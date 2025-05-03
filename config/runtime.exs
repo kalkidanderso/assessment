@@ -12,7 +12,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("RENDER_EXTERNAL_HOSTNAME") || "assessment-30ga.onrender.com"
+  host = System.get_env("RENDER_EXTERNAL_HOSTNAME") || "assessment-zreh.onrender.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :assessment, AssessmentWeb.Endpoint,
@@ -25,8 +25,8 @@ if config_env() == :prod do
     check_origin: [
       "https://#{host}",
       "//#{host}",
-      "https://assessment-30ga.onrender.com",
-      "//assessment-30ga.onrender.com"
+      "https://assessment-zreh.onrender.com",
+      "//assessment-zreh.onrender.com"
     ],
     force_ssl: [hsts: true]
 end
