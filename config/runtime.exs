@@ -1,3 +1,4 @@
+# config/runtime.exs
 import Config
 
 if System.get_env("PHX_SERVER") do
@@ -29,4 +30,8 @@ if config_env() == :prod do
       "//assessment-zreh.onrender.com"
     ],
     force_ssl: [hsts: true]
+
+  # Configure PDF generator
+  config :pdf_generator,
+    wkhtml_path: System.get_env("WKHTMLTOPDF_PATH", "/usr/bin/wkhtmltopdf")
 end
