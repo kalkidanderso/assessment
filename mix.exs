@@ -76,4 +76,12 @@ defmodule Assessment.MixProject do
       ]
     ]
   end
+
+  defp deps do
+  [
+    {:earmark, "~> 1.4"},       # Markdown processing
+    {:html_sanitize_ex, "~> 1.4"}, # HTML sanitization
+    {:pdf_generator, "~> 0.6.0"} # PDF generation
+  ] ++ deps()
+end
 end

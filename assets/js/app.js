@@ -1,44 +1,68 @@
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
+// assets/js/app.js
 
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
-
-// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
-// Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {
-  longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+// Initialize editor resize observer
+const initEditorResize = () => {
+  const editor = document.getElementById('editor')
+  if (editor) {
+    editor.style.height = 'calc(100vh - 160px)'
+    new ResizeObserver(entries => {
+      entries.forEach(entry => {
+        entry.target.style.height = 'calc(100vh - 160px)'
+      })
+    }).observe(editor)
+  }
+}
+
+// Set up LiveView hooks
+const Hooks = {
+  CopyToClipboard: {
+    mounted() {
+      this.handleEvent("copy-to-clipboard", ({ content }) => {
+        navigator.clipboard.writeText(content)
+          .then(() => this.pushEvent("copy-success"))
+          .catch(() => this.pushEvent("copy-error"))
+      })
+    }
+  },
+  MarkdownPreview: {
+    mounted() {
+      initEditorResize()
+      this.handleEvent("update-preview", ({ html }) => {
+        this.el.innerHTML = html
+        Prism.highlightAllUnder(this.el)
+      })
+    }
+  }
+}
+
+// LiveSocket configuration
+const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
+  params: { _csrf_token: csrfToken },
+  dom: {
+    onBeforeElUpdated(from, to) {
+      if (from.dataset.preserve !== undefined) return false
+    }
+  }
 })
 
-// Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
-window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
-window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+// Progress bar configuration
+topbar.config({
+  barColors: { 0: "#3B82F6" },
+  shadowColor: "rgba(0, 0, 0, 0.1)"
+})
 
-// connect if there are any LiveViews on the page
+window.addEventListener("phx:page-loading-start", () => topbar.show(300))
+window.addEventListener("phx:page-loading-stop", () => topbar.hide())
+
+// Connect to LiveView
 liveSocket.connect()
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
+// Expose for debugging
 window.liveSocket = liveSocket
-
