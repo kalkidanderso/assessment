@@ -10,7 +10,6 @@ const Hooks = {
   CopyToClipboard: {
     mounted() {
       this.el.addEventListener("click", () => {
-        const previewContent = document.getElementById("preview").innerHTML;
         this.pushEvent("copy_html", {});
       });
 
@@ -21,7 +20,7 @@ const Hooks = {
       });
     }
   },
-  
+
   ExportPdf: {
     mounted() {
       this.handleEvent("export-pdf", ({ html }) => {
@@ -31,44 +30,38 @@ const Hooks = {
         iframe.style.top = '-10000px';
         iframe.style.left = '-10000px';
         document.body.appendChild(iframe);
-        
+
         // Write content to iframe
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.open();
-        iframeDoc.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Markdown Export</title>
-            <style>
-              body { font-family: system-ui, -apple-system, sans-serif; margin: 2cm; }
-              h1, h2, h3 { color: #333; }
-              pre { background: #f5f5f5; padding: 0.5em; border-radius: 4px; }
-              code { font-family: monospace; }
-              blockquote { border-left: 4px solid #ccc; padding-left: 1em; font-style: italic; }
-              table { border-collapse: collapse; width: 100%; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              a { color: #0066cc; text-decoration: none; }
-            </style>
-          </head>
-          <body>
-            ${html}
-          </body>
-          </html>
-        `);
+        iframeDoc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Markdown Export</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 2cm; }
+    h1, h2, h3 { color: #333; }
+    pre { background: #f5f5f5; padding: 0.5em; border-radius: 4px; }
+    code { font-family: monospace; }
+    blockquote { border-left: 4px solid #ccc; padding-left: 1em; font-style: italic; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    a { color: #0066cc; text-decoration: none; }
+  </style>
+</head>
+<body>
+  ${html}
+</body>
+</html>`);
         iframeDoc.close();
-        
-        // Give time for styles to apply
+
+        // Wait for styles to apply before printing
         setTimeout(() => {
-          // Notify user
           const button = this.el;
           const originalText = button.innerText;
           button.innerText = "Preparing PDF...";
-          
-          // Print to PDF
           iframe.contentWindow.print();
-          
-          // Cleanup
+
           setTimeout(() => {
             document.body.removeChild(iframe);
             button.innerText = originalText;
@@ -77,13 +70,10 @@ const Hooks = {
       });
     }
   },
-  
+
   MarkdownPreview: {
     mounted() {
-      // For preserving scroll position between updates
       let scrollPosition = 0;
-      
-      // Update content when the data-html-content attribute changes
       const observer = new MutationObserver(mutations => {
         mutations.forEach(mutation => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'data-html-content') {
@@ -93,7 +83,7 @@ const Hooks = {
           }
         });
       });
-      
+
       observer.observe(this.el, { attributes: true });
     }
   }
@@ -111,11 +101,8 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
-// connect if there are any LiveViews on the page
+// Connect if there are any LiveViews on the page
 liveSocket.connect()
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
+// Expose for debug
 window.liveSocket = liveSocket
