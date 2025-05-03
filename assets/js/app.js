@@ -40,6 +40,18 @@ const Hooks = {
   }
 }
 
+Hooks.PdfDownload = {
+  mounted() {
+    this.handleEvent("download-pdf", ({url, filename}) => {
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    })
+  }
+}
 // LiveSocket configuration
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
