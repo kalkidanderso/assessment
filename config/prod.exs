@@ -10,3 +10,5 @@ config :assessment, AssessmentWeb.Endpoint,
 config :logger, level: :info
 
 config :phoenix, :serve_endpoints, true
+
+config :swoosh, start_permanent: false
